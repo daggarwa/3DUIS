@@ -57,7 +57,6 @@ class SemanticKITTIDataLoader(Dataset):
                 self.instance_datapath += [ os.path.join(instance_seq_path, instance_file) for instance_file in point_seq_instance ]
             except:
                 pass
-
     def __len__(self):
         return len(self.points_datapath)
 
@@ -76,8 +75,10 @@ class SemanticKITTIDataLoader(Dataset):
 
         else:
             # if not we load the full point cloud and do the preprocessing saving it at the end
-            points_set = np.fromfile(self.points_datapath[index], dtype=np.float32)
-            points_set = points_set.reshape((-1, 4))
+            points_set = np.load(self.points_datapath[index])
+            points_set = points_set.reshape((-1, 3))
+            intensity = np.ones((points_set.shape[0],1),dtype = np.float64)
+            points_set = np.concatenate((points_set, intensity), axis=1)
 
             # remove ground and get clusters from point cloud
             points_set = clusterize_pcd(points_set, self.points_datapath[index])

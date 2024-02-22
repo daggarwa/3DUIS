@@ -7,7 +7,6 @@ def clusters_hdbscan(points_set):
                                 gen_min_span_tree=True, leaf_size=100,
                                 metric='euclidean', min_cluster_size=20, min_samples=None
                             )
-
     clusterer.fit(points_set)
 
     labels = clusterer.labels_.copy()
@@ -41,12 +40,7 @@ def clusterize_pcd(points, scan_path):
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points[:, :3])
 
-    # instead of ransac use patchwork
-    ground_file = f'./Datasets/SemanticKITTI/assets/patchwork/{seq_num}/{scan_file}.label'
-    ground_labels = np.fromfile(ground_file, dtype=np.uint32)
-    ground_labels.reshape((-1))
-    inliers = list(np.where(ground_labels == 9)[0])
-
+    _, inliers = pcd.segment_plane(distance_threshold=0.25, ransac_n=3, num_iterations=200)
     pcd_ = pcd.select_by_index(inliers, invert=True)
     labels_ = np.expand_dims(clusters_hdbscan(np.asarray(pcd_.points)), axis=-1)
 

@@ -124,13 +124,13 @@ def main(config):
     model = sparse_models[cfg['model']['backbone']](in_channels=4, out_channels=96).type(torch.FloatTensor)
     model.cuda()
 
-    checkpoint = torch.load(cfg['model']['checkpoint'], map_location=torch.device('cuda'))
+    checkpoint = torch.load(cfg['model']['checkpoint'], map_location=torch.device('cpu'))
     model.load_state_dict(checkpoint[cfg['model']['checkpoint_key']])
 
     model.dropout = Identity()
 
     data_val = data_loaders[cfg['data']['dataset']](root=cfg['data']['path'], split=cfg['data']['split'])
-    val_loader = torch.utils.data.DataLoader(data_val, batch_size=1, collate_fn=SparseCollation(0.05, np.inf), shuffle=False, num_workers=10)
+    val_loader = torch.utils.data.DataLoader(data_val, batch_size=1, collate_fn=SparseCollation(0.05, np.inf), shuffle=False, num_workers=0)
 
     data_iterator = iter(val_loader)
 
